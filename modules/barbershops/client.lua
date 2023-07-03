@@ -84,8 +84,7 @@ local savedHaircutMenu = function(data)
                     if not input or not input?[1] or input?[1] == '' then
                         return;
                     end
-                    TriggerServerEvent('king-skin:server:saveHaircut', data.index, nil);
-                    TriggerServerEvent('king-skin:server:saveHaircut', input[1], data.data);
+                    TriggerServerEvent('king-skin:server:renameHaircut', data.index, input[1]);
                 end
             },
             {

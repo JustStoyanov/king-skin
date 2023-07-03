@@ -2,19 +2,22 @@
 ---@param label string
 ---@param outfit table?
 local saveOutfit = function(id, label, outfit)
-    local kvpKey = ('%s:outfit:%s'):format(id, label);
     if label then
-        local kvpKey2, outfits = ('%s:outfits'):format(id), {};
-        if GetResourceKvpString(kvpKey2) then
-            outfits = json.decode(GetResourceKvpString(kvpKey2));
-        end if outfit then
-            outfits[label] = outfit;
-            SetResourceKvp(kvpKey, json.encode(outfit));
-        else
-            outfits[label] = nil;
-            DeleteResourceKvp(kvpKey);
-        end
-        SetResourceKvp(kvpKey2, json.encode(outfits));
+        MySQL.query('SELECT saved_outfits FROM character_skins WHERE charid = ?', {
+            id
+        }, function(result)
+            if result[1] then
+                local outfits = json.decode(result[1].saved_outfits);
+                if not outfits then
+                    outfits = {};
+                end
+                outfits[label] = outfit;
+                MySQL.update('UPDATE character_skins SET saved_outfits = ? WHERE charid = ?', {
+                    json.encode(outfits),
+                    id
+                });
+            end
+        end);
     end
 end
 exports('saveOutfit', saveOutfit);
@@ -33,10 +36,13 @@ end);
 local getSavedOutfit = function(src, label)
     local retval = nil;
     if Players[src] then
-        local kvpKey = ('%s:outfit:%s'):format(Players[src], label);
-        local outfit = GetResourceKvpString(kvpKey);
-        if outfit then
-            retval = json.decode(outfit);
+        local outfit = MySQL.query.await('SELECT saved_outfits FROM character_skins WHERE charid = ?', {
+            Players[src]
+        }); if outfit[1] then
+            local outfits = json.decode(outfit[1].saved_outfits);
+            if outfits then
+                retval = outfits[label];
+            end
         end
     end
     return retval;
@@ -46,12 +52,15 @@ lib.callback.register('king-skin:server:getSavedOutfit', getSavedOutfit);
 ---@param src number
 ---@return table
 local getSavedOutfits = function(src)
-    local retval = {};
+    local retval = nil;
     if Players[src] then
-        local kvpKey = ('%s:outfits'):format(Players[src]);
-        local outfits = GetResourceKvpString(kvpKey);
-        if outfits then
-            retval = json.decode(outfits);
+        local outfit = MySQL.query.await('SELECT saved_outfits FROM character_skins WHERE charid = ?', {
+            Players[src]
+        }); if outfit[1] then
+            local outfits = json.decode(outfit[1].saved_outfits);
+            if outfits then
+                retval = outfits or {};
+            end
         end
     end
     return retval;
@@ -68,5 +77,32 @@ RegisterServerEvent('king-skin:server:shareOutfit', function(targetId, label)
     if outfit then
         local name = GetPlayerName(src);
         TriggerClientEvent('king-skin:client:shareOutfit', targetId, name, outfit);
+    end
+end);
+
+---@param oldname string
+---@param newname string
+RegisterServerEvent('king-skin:server:renameOutfit', function(oldname, newname)
+    local identifier = Players[source];
+    if identifier then
+        MySQL.query('SELECT saved_outfits FROM character_skins WHERE charid = ?', {
+            identifier
+        }, function(result)
+            if result then
+                if result[1] then
+                    local outfits = json.decode(result[1].saved_outfits);
+                    if outfits then
+                        outfits[newname] = outfits[oldname];
+                        outfits[oldname] = nil;
+                        MySQL.update('UPDATE character_skins SET saved_outfits = ? WHERE charid = ?', {
+                            json.encode(outfits),
+                            identifier
+                        }, function(affectedRows)
+                            print('affectedRows', affectedRows);
+                        end);
+                    end
+                end
+            end
+        end);
     end
 end);

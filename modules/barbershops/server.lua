@@ -2,19 +2,22 @@
 ---@param label string
 ---@param haircut table?
 local saveHaircut = function(id, label, haircut)
-    local kvpKey = ('%s:haircut:%s'):format(id, label);
     if label then
-        local kvpKey2, haircuts = ('%s:haircuts'):format(id), {};
-        if GetResourceKvpString(kvpKey2) then
-            haircuts = json.decode(GetResourceKvpString(kvpKey2));
-        end if haircut then
-            haircuts[label] = haircut;
-            SetResourceKvp(kvpKey, json.encode(haircut));
-        else
-            haircuts[label] = nil;
-            DeleteResourceKvp(kvpKey);
-        end
-        SetResourceKvp(kvpKey2, json.encode(haircuts));
+        MySQL.query('SELECT saved_haircuts FROM character_skins WHERE charid = ?', {
+            id
+        }, function(result)
+            if result[1] then
+                local haircuts = json.decode(result[1].saved_haircuts);
+                if not haircuts then
+                    haircuts = {};
+                end
+                haircuts[label] = haircut;
+                MySQL.update('UPDATE character_skins SET saved_haircuts = ? WHERE charid = ?', {
+                    json.encode(haircuts),
+                    id
+                });
+            end
+        end);
     end
 end
 exports('saveHaircut', saveHaircut);
@@ -33,10 +36,13 @@ end);
 local getSavedHaircut = function(src, label)
     local retval = nil;
     if Players[src] then
-        local kvpKey = ('%s:haircut:%s'):format(Players[src], label);
-        local haircut = GetResourceKvpString(kvpKey);
-        if haircut then
-            retval = json.decode(haircut);
+        local haircut = MySQL.query.await('SELECT saved_haircuts FROM character_skins WHERE charid = ?', {
+            Players[src]
+        }); if haircut[1] then
+            local haircuts = json.decode(haircut[1].saved_haircuts);
+            if haircuts then
+                retval = haircuts[label];
+            end
         end
     end
     return retval;
@@ -46,12 +52,15 @@ lib.callback.register('king-skin:server:getSavedHaircut', getSavedHaircut);
 ---@param src number
 ---@return table
 local getSavedHaircuts = function(src)
-    local retval = {};
+    local retval = nil;
     if Players[src] then
-        local kvpKey = ('%s:haircuts'):format(Players[src]);
-        local haircuts = GetResourceKvpString(kvpKey);
-        if haircuts then
-            retval = json.decode(haircuts);
+        local haircut = MySQL.query.await('SELECT saved_haircuts FROM character_skins WHERE charid = ?', {
+            Players[src]
+        }); if haircut[1] then
+            local haircuts = json.decode(haircut[1].saved_haircuts);
+            if haircuts then
+                retval = haircuts or {};
+            end
         end
     end
     return retval;
@@ -68,5 +77,32 @@ RegisterServerEvent('king-skin:server:shareHaircut', function(targetId, label)
     if haircut then
         local name = GetPlayerName(src);
         TriggerClientEvent('king-skin:client:shareHaircut', targetId, name, haircut);
+    end
+end);
+
+---@param oldname string
+---@param newname string
+RegisterServerEvent('king-skin:server:renameHaircut', function(oldname, newname)
+    local identifier = Players[source];
+    if identifier then
+        MySQL.query('SELECT saved_haircuts FROM character_skins WHERE charid = ?', {
+            identifier
+        }, function(result)
+            if result then
+                if result[1] then
+                    local haircuts = json.decode(result[1].saved_haircuts);
+                    if haircuts then
+                        haircuts[newname] = haircuts[oldname];
+                        haircuts[oldname] = nil;
+                        MySQL.update('UPDATE character_skins SET saved_haircuts = ? WHERE charid = ?', {
+                            json.encode(haircuts),
+                            identifier
+                        }, function(affectedRows)
+                            print('affectedRows', affectedRows);
+                        end);
+                    end
+                end
+            end
+        end);
     end
 end);

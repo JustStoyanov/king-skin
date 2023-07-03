@@ -23,9 +23,18 @@ end
 ---@return table
 local loadAppearance = function(src, id)
 	Players[src] = id;
-	local data, retval = GetResourceKvpString(('%s:appearance'):format(id)), {};
+	local retval = {};
+	local data = MySQL.query.await([[
+		SELECT current_skin FROM 
+		character_skins WHERE charid = ?
+	]], { id });
 	if data then
-		retval = json.decode(data);
+		if data[1] then
+			if #data > 1 then
+				error('DUPLICATING SKIN DATA FOR '..id);
+			end
+			retval = json.decode(data[1].current_skin);
+		end
 	end
 	return retval;
 end
@@ -34,11 +43,35 @@ ExportHandler('ox_appearance', 'load', loadAppearance, true);
 ---@param identifier string
 ---@param appearance table
 local saveAppearance = function(identifier, appearance)
-	local outfitKey = ('%s:appearance'):format(identifier);
 	if appearance then
-		SetResourceKvp(outfitKey, json.encode(appearance));
-	else
-		DeleteResourceKvp(outfitKey);
+		MySQL.query('SELECT current_skin FROM character_skins WHERE charid = ?', {
+			identifier
+		}, function(result)
+			if result then
+				if not result[1] then
+					MySQL.insert([[
+						INSERT INTO character_skins (charid, current_skin) VALUES (?, ?) 
+					]], {
+						identifier,
+						json.encode(appearance)
+					});
+				else
+					MySQL.update([[
+						UPDATE character_skins SET current_skin = ? WHERE charid = ?
+					]], {
+						json.encode(appearance),
+						identifier
+					});
+				end
+			else
+				MySQL.insert([[
+					INSERT INTO character_skins (charid, current_skin) VALUES (?, ?) 
+				]], {
+					identifier,
+					json.encode(appearance)
+				});
+			end
+		end)
 	end
 end
 ExportHandler('ox_appearance', 'save', saveAppearance, true);

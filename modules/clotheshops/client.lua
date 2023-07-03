@@ -109,8 +109,7 @@ local savedOutfitsMenus = function(data)
                     if not input or not input?[1] or input?[1] == '' then
                         return;
                     end
-                    TriggerServerEvent('king-skin:server:saveOutfit', data.index, nil);
-                    TriggerServerEvent('king-skin:server:saveOutfit', input[1], data.data);
+                    TriggerServerEvent('king-skin:server:renameOutfit', data.index, input[1]);
                 end
             },
             {
