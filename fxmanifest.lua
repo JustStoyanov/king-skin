@@ -20,8 +20,12 @@ server_scripts {
 
 shared_scripts {
     '@ox_lib/init.lua',
-    '@king-library/import.lua',
 
     'config/config.lua'
 };
 provides {'ox_appearance'};
+
+dependencies {
+    'ox_lib',
+    'oxmysql'
+};

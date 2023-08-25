@@ -20,16 +20,15 @@ RegisterNetEvent('king-skin:client:showSkinmenu', showSkinMenu);
 RegisterCommand('copySkin', function()
 	local currentSkin = exports['fivem-appearance']:getPedAppearance(cache.ped);
 	lib.setClipboard(json.encode(currentSkin));
-end);
+end, false);
 
 local saveCurrentSkin = function()
 	local currentSkin = exports['fivem-appearance']:getPedAppearance(cache.ped);
 	TriggerServerEvent('king-skin:server:saveAppearance', currentSkin);
 end
-exports('saveCurrentSkin', saveCurrentSkin);
 RegisterNetEvent('king-skin:client:saveSkin', saveCurrentSkin);
 
-RegisterCommand('saveskinbe', saveCurrentSkin)
+RegisterCommand('saveskinbe', saveCurrentSkin, false);
 
 -- Mask/Shirt/Pants/Shoes/Etc --
 
@@ -135,6 +134,6 @@ CreateThread(function()
 					break;
 				end
 			end
-		end);
+		end, false);
 	end
 end);

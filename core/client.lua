@@ -33,13 +33,16 @@ end
 ---@param blipData table
 ---@return number
 local createBlips = function(data, blipData)
-    local blip = klibrary.game.blip.add({
-        coords = data.coords,
-        sprite = blipData.sprite,
-        color = blipData.color,
-        scale = blipData.scale,
-        label = blipData.label
-    });
+    local x, y, z in data.coords;
+    local blip = AddBlipForCoord(x, y, z);
+    SetBlipSprite(blip, data.sprite);
+    SetBlipColour(blip, data.color);
+    SetBlipScale(blip, data.scale or 0.5);
+    SetBlipDisplay(blip, data.display or 2);
+    SetBlipAsShortRange(blip, data.shortRange or true);
+    BeginTextCommandSetBlipName('STRING');
+    AddTextComponentSubstringKeyboardDisplay(data.label);
+    EndTextCommandSetBlipName(blip);
     return blip;
 end
 
