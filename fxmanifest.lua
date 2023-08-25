@@ -23,9 +23,9 @@ shared_scripts {
 
     'config/config.lua'
 };
-provides {'ox_appearance'};
 
 dependencies {
     'ox_lib',
     'oxmysql'
 };
+provides {'ox_appearance'};
