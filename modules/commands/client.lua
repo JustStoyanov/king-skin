@@ -76,7 +76,7 @@ AddEventHandler('ox:playerLoaded', function(data)
 		else
 			savedProps = {};
 		end
-	end, data.charid);
+	end, data.charId);
 end);
 
 ---@return table?

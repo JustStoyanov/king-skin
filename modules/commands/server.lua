@@ -40,7 +40,7 @@ local saveSavedProps = function(src, identifier)
         local savedProps, data = lib.callback.await('king-skin:client:getSavedProps', src), {};
         if savedProps then
             data = savedProps;
-        end MySQL.query('UPDATE character_skins SET prop_status = ? WHERE charid = ?', {
+        end MySQL.query('UPDATE character_skins SET prop_status = ? WHERE charId = ?', {
             json.encode(data),
             identifier
         });
@@ -59,7 +59,7 @@ end);
 ---@return table?
 local getSavedProps = function(identifier)
     if identifier then
-        local data = MySQL.query.await('SELECT prop_status FROM character_skins WHERE charid = ?', {
+        local data = MySQL.query.await('SELECT prop_status FROM character_skins WHERE charId = ?', {
             identifier
         }); if data then
             if data[1] then

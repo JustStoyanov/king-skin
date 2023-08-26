@@ -1,6 +1,6 @@
 CREATE TABLE `character_skins` (
     `id` int(10) NOT NULL AUTO_INCREMENT,
-    `charid` int(10) NOT NULL,
+    `charId` int(10) NOT NULL,
     `current_skin` longtext DEFAULT '[]',
     `saved_haircuts` longtext DEFAULT '[]',
     `saved_outfits` longtext DEFAULT '[]',

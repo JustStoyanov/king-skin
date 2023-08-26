@@ -26,7 +26,7 @@ local loadAppearance = function(src, id)
 	local retval = {};
 	local data = MySQL.query.await([[
 		SELECT current_skin FROM 
-		character_skins WHERE charid = ?
+		character_skins WHERE charId = ?
 	]], { id });
 	if data then
 		if data[1] then
@@ -44,20 +44,20 @@ ExportHandler('ox_appearance', 'load', loadAppearance, true);
 ---@param appearance table
 local saveAppearance = function(identifier, appearance)
 	if appearance then
-		MySQL.query('SELECT current_skin FROM character_skins WHERE charid = ?', {
+		MySQL.query('SELECT current_skin FROM character_skins WHERE charId = ?', {
 			identifier
 		}, function(result)
 			if result then
 				if not result[1] then
 					MySQL.insert([[
-						INSERT INTO character_skins (charid, current_skin) VALUES (?, ?) 
+						INSERT INTO character_skins (charId, current_skin) VALUES (?, ?) 
 					]], {
 						identifier,
 						json.encode(appearance)
 					});
 				else
 					MySQL.update([[
-						UPDATE character_skins SET current_skin = ? WHERE charid = ?
+						UPDATE character_skins SET current_skin = ? WHERE charId = ?
 					]], {
 						json.encode(appearance),
 						identifier
@@ -65,7 +65,7 @@ local saveAppearance = function(identifier, appearance)
 				end
 			else
 				MySQL.insert([[
-					INSERT INTO character_skins (charid, current_skin) VALUES (?, ?) 
+					INSERT INTO character_skins (charId, current_skin) VALUES (?, ?) 
 				]], {
 					identifier,
 					json.encode(appearance)
