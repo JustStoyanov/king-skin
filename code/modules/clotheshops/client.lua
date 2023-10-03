@@ -12,6 +12,8 @@ local buyClothes = function()
 	});
 end
 
+---@type function
+---@return nil
 local saveClothes = function()
     local input = lib.inputDialog('Save Outfit', {'Outfit Label:'});
     if not input or not input?[1] or input?[1] == '' then

@@ -3,7 +3,7 @@
 ---@param outfit table?
 local saveOutfit = function(id, label, outfit)
     if label then
-        MySQL.query('SELECT saved_outfits FROM character_skins WHERE charId = ?', {
+        MySQL.query('SELECT saved_outfits FROM character_skins WHERE charid = ?', {
             id
         }, function(result)
             if result[1] then
@@ -12,7 +12,7 @@ local saveOutfit = function(id, label, outfit)
                     outfits = {};
                 end
                 outfits[label] = outfit;
-                MySQL.update('UPDATE character_skins SET saved_outfits = ? WHERE charId = ?', {
+                MySQL.update('UPDATE character_skins SET saved_outfits = ? WHERE charid = ?', {
                     json.encode(outfits),
                     id
                 });
@@ -36,7 +36,7 @@ end);
 local getSavedOutfit = function(src, label)
     local retval = nil;
     if Players[src] then
-        local outfit = MySQL.query.await('SELECT saved_outfits FROM character_skins WHERE charId = ?', {
+        local outfit = MySQL.query.await('SELECT saved_outfits FROM character_skins WHERE charid = ?', {
             Players[src]
         }); if outfit[1] then
             local outfits = json.decode(outfit[1].saved_outfits);
@@ -54,7 +54,7 @@ lib.callback.register('king-skin:server:getSavedOutfit', getSavedOutfit);
 local getSavedOutfits = function(src)
     local retval = nil;
     if Players[src] then
-        local outfit = MySQL.query.await('SELECT saved_outfits FROM character_skins WHERE charId = ?', {
+        local outfit = MySQL.query.await('SELECT saved_outfits FROM character_skins WHERE charid = ?', {
             Players[src]
         }); if outfit[1] then
             local outfits = json.decode(outfit[1].saved_outfits);
@@ -85,7 +85,7 @@ end);
 RegisterServerEvent('king-skin:server:renameOutfit', function(oldname, newname)
     local identifier = Players[source];
     if identifier then
-        MySQL.query('SELECT saved_outfits FROM character_skins WHERE charId = ?', {
+        MySQL.query('SELECT saved_outfits FROM character_skins WHERE charid = ?', {
             identifier
         }, function(result)
             if result then
@@ -94,12 +94,10 @@ RegisterServerEvent('king-skin:server:renameOutfit', function(oldname, newname)
                     if outfits then
                         outfits[newname] = outfits[oldname];
                         outfits[oldname] = nil;
-                        MySQL.update('UPDATE character_skins SET saved_outfits = ? WHERE charId = ?', {
+                        MySQL.update('UPDATE character_skins SET saved_outfits = ? WHERE charid = ?', {
                             json.encode(outfits),
                             identifier
-                        }, function(affectedRows)
-                            print('affectedRows', affectedRows);
-                        end);
+                        });
                     end
                 end
             end

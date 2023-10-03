@@ -3,7 +3,7 @@
 ---@param haircut table?
 local saveHaircut = function(id, label, haircut)
     if label then
-        MySQL.query('SELECT saved_haircuts FROM character_skins WHERE charId = ?', {
+        MySQL.query('SELECT saved_haircuts FROM character_skins WHERE charid = ?', {
             id
         }, function(result)
             if result[1] then
@@ -12,7 +12,7 @@ local saveHaircut = function(id, label, haircut)
                     haircuts = {};
                 end
                 haircuts[label] = haircut;
-                MySQL.update('UPDATE character_skins SET saved_haircuts = ? WHERE charId = ?', {
+                MySQL.update('UPDATE character_skins SET saved_haircuts = ? WHERE charid = ?', {
                     json.encode(haircuts),
                     id
                 });
@@ -36,7 +36,7 @@ end);
 local getSavedHaircut = function(src, label)
     local retval = nil;
     if Players[src] then
-        local haircut = MySQL.query.await('SELECT saved_haircuts FROM character_skins WHERE charId = ?', {
+        local haircut = MySQL.query.await('SELECT saved_haircuts FROM character_skins WHERE charid = ?', {
             Players[src]
         }); if haircut[1] then
             local haircuts = json.decode(haircut[1].saved_haircuts);
@@ -54,7 +54,7 @@ lib.callback.register('king-skin:server:getSavedHaircut', getSavedHaircut);
 local getSavedHaircuts = function(src)
     local retval = nil;
     if Players[src] then
-        local haircut = MySQL.query.await('SELECT saved_haircuts FROM character_skins WHERE charId = ?', {
+        local haircut = MySQL.query.await('SELECT saved_haircuts FROM character_skins WHERE charid = ?', {
             Players[src]
         }); if haircut[1] then
             local haircuts = json.decode(haircut[1].saved_haircuts);
@@ -85,7 +85,7 @@ end);
 RegisterServerEvent('king-skin:server:renameHaircut', function(oldname, newname)
     local identifier = Players[source];
     if identifier then
-        MySQL.query('SELECT saved_haircuts FROM character_skins WHERE charId = ?', {
+        MySQL.query('SELECT saved_haircuts FROM character_skins WHERE charid = ?', {
             identifier
         }, function(result)
             if result then
@@ -94,12 +94,10 @@ RegisterServerEvent('king-skin:server:renameHaircut', function(oldname, newname)
                     if haircuts then
                         haircuts[newname] = haircuts[oldname];
                         haircuts[oldname] = nil;
-                        MySQL.update('UPDATE character_skins SET saved_haircuts = ? WHERE charId = ?', {
+                        MySQL.update('UPDATE character_skins SET saved_haircuts = ? WHERE charid = ?', {
                             json.encode(haircuts),
                             identifier
-                        }, function(affectedRows)
-                            print('affectedRows', affectedRows);
-                        end);
+                        });
                     end
                 end
             end

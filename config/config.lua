@@ -44,8 +44,8 @@ Config.Barbershops = {
 Config.Clotheshops = {
     Type = 'Clotheshop',
     Blip = {
-        sprite = 366,
-        color = 2,
+        sprite = 73,
+        color = 0,
         scale = 0.5,
         label = 'Clotheshop'
     },

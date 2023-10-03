@@ -1,5 +1,6 @@
 ---@type function
 local showSkinMenu = function()
+	---@param appearance table
 	exports['fivem-appearance']:startPlayerCustomization(function(appearance)
 		if appearance then
 			TriggerServerEvent('king-skin:server:saveSkin', appearance);
@@ -17,21 +18,23 @@ local showSkinMenu = function()
 end
 RegisterNetEvent('king-skin:client:showSkinmenu', showSkinMenu);
 
+---@type function
 RegisterCommand('copySkin', function()
 	local currentSkin = exports['fivem-appearance']:getPedAppearance(cache.ped);
 	lib.setClipboard(json.encode(currentSkin));
-end, false);
+end);
 
+---@type function
 local saveCurrentSkin = function()
 	local currentSkin = exports['fivem-appearance']:getPedAppearance(cache.ped);
 	TriggerServerEvent('king-skin:server:saveAppearance', currentSkin);
 end
+exports('saveCurrentSkin', saveCurrentSkin);
 RegisterNetEvent('king-skin:client:saveSkin', saveCurrentSkin);
-
-RegisterCommand('saveskinbe', saveCurrentSkin, false);
 
 -- Mask/Shirt/Pants/Shoes/Etc --
 
+---@type table
 local propAnims = {
 	['hat'] = {
 		on = {
@@ -65,18 +68,21 @@ local propCommands, savedProps = {
 	['bracelet'] = 7
 }, {};
 
+---@type function
 AddEventHandler('ox:playerLogout', function()
 	TriggerServerEvent('king-skin:server:saveSavedProps');
 end);
 
+---@param data table
 AddEventHandler('ox:playerLoaded', function(data)
+	---@param dta table
 	lib.callback('king-skin:server:getSavedProps', false, function(dta)
 		if dta then
 			savedProps = dta;
 		else
 			savedProps = {};
 		end
-	end, data.charId);
+	end, data.charid);
 end);
 
 ---@return table?
@@ -134,6 +140,6 @@ CreateThread(function()
 					break;
 				end
 			end
-		end, false);
+		end);
 	end
 end);

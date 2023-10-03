@@ -5,16 +5,7 @@ local inClotheshop, inBarber, inTattoo = false, false, false;
 
 ---@param shopType string
 local showTextUI = function(shopType)
-    lib.showTextUI('[E] '..shopType, {
-        style = {
-            color = 'rgba(255, 255, 255, 0.8)',
-            backgroundColor = 'rgba(51, 112, 165, 0.7)',
-            borderRight = '2px solid rgba(25, 56, 82, 0.5)',
-            borderBottom = '3px solid rgba(25, 56, 82, 0.5)',
-            boxShadow = 'rgba(0, 0, 0, 0.3) 0px 0px 5px',
-            borderRadius = '5px'
-        }
-    });
+    lib.showTextUI('[E] '..shopType);
 end
 
 ---@param shopType string
@@ -33,17 +24,14 @@ end
 ---@param blipData table
 ---@return number
 local createBlips = function(data, blipData)
-    local x, y, z in data.coords;
-    local blip = AddBlipForCoord(x, y, z);
-    SetBlipSprite(blip, data.sprite);
-    SetBlipColour(blip, data.color);
-    SetBlipScale(blip, data.scale or 0.5);
-    SetBlipDisplay(blip, data.display or 2);
-    SetBlipAsShortRange(blip, data.shortRange or true);
-    BeginTextCommandSetBlipName('STRING');
-    AddTextComponentSubstringKeyboardDisplay(data.label);
-    EndTextCommandSetBlipName(blip);
-    return blip;
+    local blip = mlib.blip.add({
+        coords = data.coords,
+        sprite = blipData.sprite,
+        color = blipData.color,
+        scale = blipData.scale,
+        label = blipData.label
+    });
+    return blip.id;
 end
 
 ---@param shopSize vector3?
@@ -157,4 +145,18 @@ end);
 ---@return false | number
 exports('inTattoo', function()
     return inTattoo;
+end);
+
+-- UI --
+
+---@param args table
+RegisterCommand('+king_skin_new_ui', function(_, args)
+    if args and args?[1] then
+        if args[1] == '27' then
+            SendNuiMessage(json.encode({
+                action = 'showUI',
+                type = 'all'
+            }));
+        end
+    end
 end);

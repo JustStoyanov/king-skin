@@ -91,7 +91,8 @@ local savedHaircutMenu = function(data)
                 title = 'Delete Haircut',
                 onSelect = function()
                     local alert = lib.alertDialog({
-                        header = 'Are you sure you want to delete this haircut?',
+                        header = 'U sure?',
+                        content = 'Are you sure you want to delete this haircut?',
                         centered = true,
                         cancel = true
                     }); if alert == 'confirm' then
